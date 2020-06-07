@@ -16,7 +16,6 @@ export async function filterImageFromURL(inputURL: string): Promise<string>{
         } catch (e) {
             // Failed to download file
             reject(e)
-            return
         }
         const outpath = '/tmp/filtered.'+Math.floor(Math.random() * 2000)+'.jpg';
         await photo
