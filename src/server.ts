@@ -48,12 +48,18 @@ import { runInNewContext } from 'vm';
       // File downloaded successfully. Return this file to the client.
       res.sendFile(filename, function(err) {
         if (err) {
+          console.debug(`Successfully downloaded file: ${image_url}`)
           return res.status(500).send("** Error encountered during file download: " + err)
         } else {
           // Delete file from local filesystem
+          console.debug(`Deleting local file: ${filename}`)
           deleteLocalFiles([filename]);
         }
       });
+    })
+    .catch(function(err) {
+      return res.status(400).send("** Unable to access image URL: " + image_url)
+      console.error(`Error downloading file: ${image_url}, Error: ${err}`)
     })
 
     // TODO: Handle errors when the URL is invalid
