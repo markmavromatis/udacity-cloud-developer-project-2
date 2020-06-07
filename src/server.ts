@@ -30,6 +30,28 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
+  app.get( "/filteredimage", async ( req, res ) => {
+    let { image_url } = req.query;
+
+    // Confirm that called specified the image_url query parameter
+    if (!image_url) {
+      return res.status(400)
+              .send(`image_url is required`);
+    } else {
+      console.log("Image URL = " + image_url);
+    }
+
+    const processedImage = filterImageFromURL(image_url);
+
+    // File downloaded successfully. Return this file to the client.
+    processedImage.then(function(filename) {
+      res.sendFile(filename);
+      // TODO: Delete file
+    })
+
+    // TODO: Handle errors when the URL is invalid
+
+  } );
   
   // Root Endpoint
   // Displays a simple message to the user
