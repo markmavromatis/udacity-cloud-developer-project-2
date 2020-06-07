@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { runInNewContext } from 'vm';
 
 (async () => {
 
@@ -43,10 +44,16 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
     const processedImage = filterImageFromURL(image_url);
 
-    // File downloaded successfully. Return this file to the client.
     processedImage.then(function(filename) {
-      res.sendFile(filename);
-      // TODO: Delete file
+      // File downloaded successfully. Return this file to the client.
+      res.sendFile(filename, function(err) {
+        if (err) {
+          return res.status(500).send("** Error encountered during file download: " + err)
+        } else {
+          // Delete file from local filesystem
+          deleteLocalFiles([filename]);
+        }
+      });
     })
 
     // TODO: Handle errors when the URL is invalid
