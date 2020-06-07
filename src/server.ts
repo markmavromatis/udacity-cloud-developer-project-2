@@ -55,7 +55,7 @@ import { runInNewContext } from 'vm';
     .catch(function(err) {
       // Report errors due to invalid URL or other issues
       console.error(`Error downloading file: ${image_url}, Error: ${err}`);
-      return res.status(400).send("** Unable to process image URL: " + image_url);
+      return res.status(422).send("** Unable to process image URL: " + image_url);
     })
 
 
