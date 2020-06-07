@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import { runInNewContext } from 'vm';
 
 (async () => {
 
@@ -30,6 +31,40 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   /**************************************************************************** */
 
   //! END @TODO1
+  app.get( "/filteredimage", async ( req, res ) => {
+    let { image_url } = req.query;
+
+    // Confirm that called specified the image_url query parameter
+    if (!image_url) {
+      return res.status(400)
+              .send(`image_url is required`);
+    } else {
+      console.log("Image URL = " + image_url);
+    }
+
+    const processedImage = filterImageFromURL(image_url);
+
+    processedImage.then(function(filename) {
+      // File downloaded successfully. Return this file to the client.
+      res.sendFile(filename, function(err) {
+        if (err) {
+          console.debug(`Successfully downloaded file: ${image_url}`)
+          return res.status(500).send("** Error encountered during file download: " + err)
+        } else {
+          // Delete file from local filesystem
+          console.debug(`Deleting local file: ${filename}`)
+          deleteLocalFiles([filename]);
+        }
+      });
+    })
+    .catch(function(err) {
+      return res.status(400).send("** Unable to access image URL: " + image_url)
+      console.error(`Error downloading file: ${image_url}, Error: ${err}`)
+    })
+
+    // TODO: Handle errors when the URL is invalid
+
+  } );
   
   // Root Endpoint
   // Displays a simple message to the user
