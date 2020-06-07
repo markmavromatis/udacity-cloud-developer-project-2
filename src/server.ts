@@ -11,6 +11,8 @@ import { runInNewContext } from 'vm';
   // Set the network port
   const port = process.env.PORT || 8082;
   
+  const fetch = require('node-fetch');
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -38,6 +40,12 @@ import { runInNewContext } from 'vm';
     if (!image_url) {
       return res.status(400)
           .send(`image_url is required`);
+    }
+
+    // Check that image_url points to a live link
+    const urlGetResponse = await fetch(image_url)
+    if (!urlGetResponse.ok) {
+      return res.status(400).send("** Unable to access image URL: " + image_url);
     }
 
     const processedImage : Promise<string> = filterImageFromURL(image_url);

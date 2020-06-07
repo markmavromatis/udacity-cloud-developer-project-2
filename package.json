@@ -28,8 +28,10 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.5.7",
     "bluebird": "^3.7.2",
     "express": "^4.17.1",
-    "jimp": "^0.13.0"
+    "jimp": "^0.13.0",
+    "node-fetch": "^2.6.0"
   }
 }
