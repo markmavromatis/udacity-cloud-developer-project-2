@@ -57,6 +57,8 @@ import { runInNewContext } from 'vm';
           // Delete file from local filesystem. We no longer need it.
           console.debug(`Deleting local file: ${filename}`);
           deleteLocalFiles([filename]);
+        } else {
+          console.error(`Error deleting file: ${filename}, ${err}`);
         }
       });
     })
