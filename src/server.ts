@@ -11,6 +11,8 @@ import { runInNewContext } from 'vm';
   // Set the network port
   const port = process.env.PORT || 8082;
   
+  const fetch = require('node-fetch');
+
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
@@ -23,7 +25,7 @@ import { runInNewContext } from 'vm';
   //    2. call filterImageFromURL(image_url) to filter the image
   //    3. send the resulting file in the response
   //    4. deletes any files on the server on finish of the response
-  // QUERY PARAMATERS
+  // QUERY PARAMETERS
   //    image_url: URL of a publicly accessible image
   // RETURNS
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
@@ -37,32 +39,33 @@ import { runInNewContext } from 'vm';
     // Confirm that called specified the image_url query parameter
     if (!image_url) {
       return res.status(400)
-              .send(`image_url is required`);
-    } else {
-      console.log("Image URL = " + image_url);
+          .send(`image_url is required`);
     }
 
-    const processedImage = filterImageFromURL(image_url);
+    // Check that image_url points to a live link
+    const urlGetResponse = await fetch(image_url)
+    if (!urlGetResponse.ok) {
+      return res.status(400).send("** Unable to access image URL: " + image_url);
+    }
+
+    const processedImage : Promise<string> = filterImageFromURL(image_url);
 
     processedImage.then(function(filename) {
       // File downloaded successfully. Return this file to the client.
       res.sendFile(filename, function(err) {
-        if (err) {
-          console.debug(`Successfully downloaded file: ${image_url}`)
-          return res.status(500).send("** Error encountered during file download: " + err)
-        } else {
-          // Delete file from local filesystem
-          console.debug(`Deleting local file: ${filename}`)
+        if (!err) {
+          // Delete file from local filesystem. We no longer need it.
+          console.debug(`Deleting local file: ${filename}`);
           deleteLocalFiles([filename]);
         }
       });
     })
     .catch(function(err) {
-      return res.status(400).send("** Unable to access image URL: " + image_url)
-      console.error(`Error downloading file: ${image_url}, Error: ${err}`)
+      // Report errors due to invalid URL or other issues
+      console.error(`Error processing URL: ${image_url}, ${err}`);
+      return res.status(422).send("** Unable to process image URL: " + image_url);
     })
 
-    // TODO: Handle errors when the URL is invalid
 
   } );
   
